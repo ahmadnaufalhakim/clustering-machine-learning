@@ -20,16 +20,50 @@ class Agnes :
     def get_dist_cluster(self, id_cluster1, id_cluster2):
         ''' Get best data in cluster for calculate distance '''
         if self.linkage == 0: # single linkage
-            dist = math.inf
+            min_dist = math.inf
             for node1 in self.clusters[id_cluster1]:
+                data1 = self.dataframe.iloc[node1]
                 for node2 in self.clusters[id_cluster2]:
                     # Cari data-data yang paling deket
-                    data1 = self.dataframe.iloc[node1]
                     data2 = self.dataframe.iloc[node2]
                     temp = self.euclidean_distance(data1, data2)
                     # Update biar selalu paling kecil
-                    if temp < dist: dist = temp
-            return dist
+                    if temp < min_dist: min_dist = temp
+            return min_dist
+        
+        elif self.linkage == 1: # complete linkage
+            max_dist = -1
+            for node1 in self.clusters[id_cluster1]:
+                data1 = self.dataframe.iloc[node1]
+                for node2 in self.clusters[id_cluster2]:
+                    # Cari data-data yang paling jauh
+                    data2 = self.dataframe.iloc[node2]
+                    temp = self.euclidean_distance(data1, data2)
+                    # Update biar selalu paling besar
+                    if temp > max_dist: max_dist = temp
+            return max_dist
+        
+        elif self.linkage == 2: # average linkage
+            sum_dist = 0
+            for node1 in self.clusters[id_cluster1]:
+                data1 = self.dataframe.iloc[node1]
+                for node2 in self.clusters[id_cluster2]:
+                    data2 = self.dataframe.iloc[node2]
+                    # Jumlahkan jarak 
+                    sum_dist += self.euclidean_distance(data1, data2)
+            return sum_dist / (len(self.clusters[id_cluster1]) * len(self.clusters[id_cluster2]))
+        
+        elif self.linkage == 3: # average group linkage
+            sum1, sum2 = 0, 0
+            for node1 in self.clusters[id_cluster1]:
+                data1 = self.dataframe.iloc[node1]
+                sum1 += data1
+            for node2 in self.clusters[id_cluster2]:
+                data2 = self.dataframe.iloc[node2]
+                sum2 += data2    
+            mean1 = sum1 / len(self.clusters[id_cluster1])
+            mean2 = sum2 / len(self.clusters[id_cluster2])
+            return self.euclidean_distance(mean1, mean2)
 
     def calc_distance_mat(self):
         n_data = self.n_clusters
@@ -74,7 +108,7 @@ class Agnes :
         cluster2 = clusters.pop(max(node1, node2) -1)
         return clusters + [cluster1 + cluster2]
 
-    def agnes(self, dataframe, linkage_type):
+    def agnes(self, dataframe, linkage_type, k):
         self.dataframe = dataframe
         self.linkage = self.set_linkage(linkage_type)
         
@@ -90,7 +124,7 @@ class Agnes :
         print(self.clusters)
         
         iter = 1
-        while self.n_clusters > 1:
+        while self.n_clusters > k:
             self.distance_matrix = self.calc_distance_mat()
             print("matriks jarak \n", self.distance_matrix)
             min_val, node1, node2 = self.get_min_dist()
