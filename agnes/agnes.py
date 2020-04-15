@@ -1,9 +1,6 @@
-import pandas as py
+import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import warnings
-import copy
-import math
+import math, time
 
 class Agnes :
     def __init__(self):
@@ -12,6 +9,8 @@ class Agnes :
         self.clusters = []
         self.distance_matrix = None
         self.linkage = -1
+        self.clusters_append = []
+        self.Z = []
     
     def euclidean_distance(self, X, Y) :
         ''' Calculate the Euclidean distance of two vectors '''
@@ -102,13 +101,18 @@ class Agnes :
                 node1, node2 = i, np.argmin(self.distance_matrix[i])
         return min_val, node1, node2
         
-    def join_cluster(self, node1, node2):
+    def join_cluster(self, node1, node2, dist):
         clusters = self.clusters
         cluster1 = clusters.pop(min(node1, node2))
         cluster2 = clusters.pop(max(node1, node2) -1)
+        id_c1 = self.clusters_append.index(cluster1)
+        id_c2 = self.clusters_append.index(cluster2)
+        n_singleton = len(cluster1) + len(cluster2)
+        self.Z.append([float(id_c1), float(id_c2), float(dist), float(n_singleton)])
+        self.clusters_append += [cluster1 + cluster2]
         return clusters + [cluster1 + cluster2]
 
-    def agnes(self, dataframe, linkage_type, k):
+    def agnes(self, dataframe, linkage_type, k=1):
         self.dataframe = dataframe
         self.linkage = self.set_linkage(linkage_type)
         
@@ -119,17 +123,28 @@ class Agnes :
         # Init n-clusters
         self.n_clusters = self.dataframe.shape[0]
         self.clusters = [[i] for i in range(self.n_clusters)]
-        
-        # Init matrix jarak
-        print(self.clusters)
+        self.clusters_append = [i for i in self.clusters]
+
+        # print(self.clusters)
+        # print(self.clusters_append)
         
         iter = 1
+        start_tot = time.time()
         while self.n_clusters > k:
+            start = time.time()
             self.distance_matrix = self.calc_distance_mat()
-            print("matriks jarak \n", self.distance_matrix)
+            # print("matriks jarak \n", self.distance_matrix)
             min_val, node1, node2 = self.get_min_dist()
-            print("minimal value", min_val, "from", node1, node2)
-            self.clusters = self.join_cluster(node1, node2)
-            print("cluster hasil iter", iter, self.clusters)
+            # print("minimal value", min_val, "from", node1, node2)
+            self.clusters = self.join_cluster(node1, node2, min_val)
+            print("cluster baru iter", iter, self.clusters_append[-1])
             self.n_clusters = len(self.clusters)
+            end = time.time()
+            print("waktu iterasi", iter, end-start, "s")
+            # print("cluster append >", self.clusters_append)
+            # print("Z >\n", np.array(self.Z))
             iter +=1
+        
+        end_tot = time.time()
+        print("Total Time", end_tot-start_tot, "s")
+        return np.array(self.Z)

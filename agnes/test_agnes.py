@@ -6,10 +6,13 @@ def main():
     agnes = Agnes()
 
     # df = pd.DataFrame([[0,0,0],[3,4,0], [5,12,0]])
-    df = pd.read_csv("csv/iris_no_label_10.csv")
+    # df = pd.read_csv("csv/iris_no_label_10.csv")
+    df =  pd.read_csv("csv/iris_no_label.csv")
     # print(df)
 
-    agnes.agnes(df, 'average group', k=1)
+    Z = agnes.agnes(df, 'single')
+
+    print(Z)
 
 
 
