@@ -11,6 +11,7 @@ class Agnes :
         self.linkage = -1
         self.clusters_append = []
         self.Z = []
+        self.final_clusters = []
     
     def euclidean_distance(self, X, Y) :
         ''' Calculate the Euclidean distance of two vectors '''
@@ -130,7 +131,7 @@ class Agnes :
         
         iter = 1
         start_tot = time.time()
-        while self.n_clusters > k:
+        while self.n_clusters > 1:
             start = time.time()
             self.distance_matrix = self.calc_distance_mat()
             # print("matriks jarak \n", self.distance_matrix)
@@ -143,8 +144,20 @@ class Agnes :
             print("waktu iterasi", iter, end-start, "s")
             # print("cluster append >", self.clusters_append)
             # print("Z >\n", np.array(self.Z))
+            if self.n_clusters == k:
+                print("\niterasi dilanjutkan untuk dendrogram")
+                self.final_clusters = [c for c in self.clusters]
             iter +=1
         
         end_tot = time.time()
         print("Total Time", end_tot-start_tot, "s")
         return np.array(self.Z)
+
+    def get_label(self):
+        n_data = self.dataframe.shape[0]
+        label = []
+        for i in range(n_data):
+            for id_cluster in range(len(self.final_clusters)):
+                if i in self.final_clusters[id_cluster]:
+                    label.append(id_cluster)
+        return label
