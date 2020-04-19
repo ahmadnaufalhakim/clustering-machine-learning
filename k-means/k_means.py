@@ -11,7 +11,7 @@ class K_Means :
         self.n_clusters = 0
         self.centroids = []
         self.clusters = {}
-        self.clusters_labels = []
+        self.data_labels = []
 
     def get_n_clusters(self) :
         """Get number of clusters"""
@@ -104,8 +104,12 @@ class K_Means :
                 current_clusters = copy.deepcopy(self.clusters)
                 self.clusters = {k : [] for k in range(self.get_n_clusters())}
         
-        # Add clusters labels
-        self.clusters_labels = [label for label in self.clusters.keys()]
+        # Assigning data labels
+        self.data_labels = [None] * len(dataframe)
+        for key in self.clusters.keys() :
+            for data in range(len(self.clusters[key])) :
+                self.data_labels[self.clusters[key][data][0]] = key
+
         print("clustering stopped")
         return
 
