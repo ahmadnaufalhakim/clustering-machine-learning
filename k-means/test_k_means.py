@@ -12,7 +12,7 @@ def main() :
     print()
     print("Centroids results:")
     print("len=" + str(len(km.centroids)) + "\ncentroids:" + str(km.centroids) + "\n" + str(type(km.centroids)))
-    # print(str(len(km.clusters)) + " " + str(km.clusters) + " " + str(type(km.clusters)))
+    print("len=" + str(len(km.clusters)) + "\nclusters:" + str(km.clusters) + "\n" + str(type(km.clusters)))
 
 if __name__ == "__main__":
     main()
